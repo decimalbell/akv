@@ -29,7 +29,7 @@ func newBytesValue(val []byte) *Value {
 func newHashValue() *Value {
 	return &Value{
 		typ: valueTypeHash,
-		val: make(Map),
+		val: newMap(),
 	}
 }
 

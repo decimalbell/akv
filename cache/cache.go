@@ -49,12 +49,36 @@ func (c *Cache) HGet(ctx context.Context, key string, field string) ([]byte, err
 	return cache.HGet(ctx, key, field)
 }
 
+func (c *Cache) HGetAll(ctx context.Context, key string) ([][]byte, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+
+	return cache.HGetAll(ctx, key)
+}
+
+func (c *Cache) HKeys(ctx context.Context, key string) ([]string, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+
+	return cache.HKeys(ctx, key)
+}
+
 func (c *Cache) HSet(ctx context.Context, key string, field string, val []byte) (int, error) {
 	rwmutex, cache := c.rwmutexcache(key)
 	rwmutex.Lock()
 	defer rwmutex.Unlock()
 
 	return cache.HSet(ctx, key, field, val)
+}
+
+func (c *Cache) HVals(ctx context.Context, key string) ([][]byte, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+
+	return cache.HVals(ctx, key)
 }
 
 // Keys group

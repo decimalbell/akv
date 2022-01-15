@@ -67,6 +67,28 @@ func (c *Cache) HGet(ctx context.Context, key string, field string) ([]byte, err
 	return h[field], nil
 }
 
+func (c *Cache) HGetAll(ctx context.Context, key string) ([][]byte, error) {
+	h, err := c.getHashValue(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	if h == nil {
+		return nil, nil
+	}
+	return h.items(), nil
+}
+
+func (c *Cache) HKeys(ctx context.Context, key string) ([]string, error) {
+	h, err := c.getHashValue(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	if h == nil {
+		return nil, nil
+	}
+	return h.keys(), nil
+}
+
 func (c *Cache) HSet(ctx context.Context, key string, field string, val []byte) (int, error) {
 	h, err := c.setDefaultHashValue(ctx, key)
 	if err != nil {
@@ -79,6 +101,17 @@ func (c *Cache) HSet(ctx context.Context, key string, field string, val []byte) 
 	}
 	h[field] = val
 	return 1, nil
+}
+
+func (c *Cache) HVals(ctx context.Context, key string) ([][]byte, error) {
+	h, err := c.getHashValue(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	if h == nil {
+		return nil, nil
+	}
+	return h.values(), nil
 }
 
 // Keys group

@@ -13,7 +13,10 @@ type Cache interface {
 	// Hashes group
 	HDel(ctx context.Context, key string, fields []string) (int, error)
 	HGet(ctx context.Context, key string, field string) ([]byte, error)
+	HGetAll(ctx context.Context, key string) ([][]byte, error)
+	HKeys(ctx context.Context, key string) ([]string, error)
 	HSet(ctx context.Context, key string, field string, val []byte) (int, error)
+	HVals(ctx context.Context, key string) ([][]byte, error)
 
 	// Keys group
 	Del(ctx context.Context, keys []string) int

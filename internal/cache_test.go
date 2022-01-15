@@ -50,6 +50,32 @@ func TestHGet(t *testing.T) {
 	}
 }
 
+func TestHGetAll(t *testing.T) {
+	cache := NewCache()
+	ctx := context.TODO()
+	key := "key"
+	field := "field"
+	value := []byte("value")
+
+	cache.HSet(ctx, key, field, value)
+	v, err := cache.HGetAll(ctx, key)
+	assert.Nil(t, err)
+	assert.Equal(t, [][]byte{[]byte(field), value}, v)
+}
+
+func TestHKeys(t *testing.T) {
+	cache := NewCache()
+	ctx := context.TODO()
+	key := "key"
+	field := "field"
+	value := []byte("value")
+
+	cache.HSet(ctx, key, field, value)
+	v, err := cache.HKeys(ctx, key)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{field}, v)
+}
+
 func TestHSet(t *testing.T) {
 	cache := NewCache()
 	ctx := context.TODO()
@@ -61,6 +87,19 @@ func TestHSet(t *testing.T) {
 	v, err := cache.HGet(ctx, key, field)
 	assert.Nil(t, err)
 	assert.Equal(t, v, value)
+}
+
+func TestHVals(t *testing.T) {
+	cache := NewCache()
+	ctx := context.TODO()
+	key := "key"
+	field := "field"
+	value := []byte("value")
+
+	cache.HSet(ctx, key, field, value)
+	v, err := cache.HVals(ctx, key)
+	assert.Nil(t, err)
+	assert.Equal(t, [][]byte{value}, v)
 }
 
 // Keys group
