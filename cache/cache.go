@@ -65,6 +65,14 @@ func (c *Cache) HKeys(ctx context.Context, key string) ([]string, error) {
 	return cache.HKeys(ctx, key)
 }
 
+func (c *Cache) HLen(ctx context.Context, key string) (int, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+
+	return cache.HLen(ctx, key)
+}
+
 func (c *Cache) HSet(ctx context.Context, key string, field string, val []byte) (int, error) {
 	rwmutex, cache := c.rwmutexcache(key)
 	rwmutex.Lock()

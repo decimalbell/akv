@@ -76,6 +76,27 @@ func TestHKeys(t *testing.T) {
 	assert.Equal(t, []string{field}, v)
 }
 
+func TestHLen(t *testing.T) {
+	cache := NewCache()
+	ctx := context.TODO()
+	key := "key"
+	field := "field"
+	value := []byte("value")
+
+	{
+		v, err := cache.HLen(ctx, key)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, v)
+	}
+
+	{
+		cache.HSet(ctx, key, field, value)
+		v, err := cache.HLen(ctx, key)
+		assert.Nil(t, err)
+		assert.Equal(t, 1, v)
+	}
+}
+
 func TestHSet(t *testing.T) {
 	cache := NewCache()
 	ctx := context.TODO()

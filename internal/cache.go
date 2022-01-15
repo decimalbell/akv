@@ -89,6 +89,17 @@ func (c *Cache) HKeys(ctx context.Context, key string) ([]string, error) {
 	return h.keys(), nil
 }
 
+func (c *Cache) HLen(ctx context.Context, key string) (int, error) {
+	h, err := c.getHashValue(ctx, key)
+	if err != nil {
+		return 0, err
+	}
+	if h == nil {
+		return 0, nil
+	}
+	return h.len(), nil
+}
+
 func (c *Cache) HSet(ctx context.Context, key string, field string, val []byte) (int, error) {
 	h, err := c.setDefaultHashValue(ctx, key)
 	if err != nil {

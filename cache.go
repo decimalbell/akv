@@ -15,6 +15,7 @@ type Cache interface {
 	HGet(ctx context.Context, key string, field string) ([]byte, error)
 	HGetAll(ctx context.Context, key string) ([][]byte, error)
 	HKeys(ctx context.Context, key string) ([]string, error)
+	HLen(ctx context.Context, key string) (int, error)
 	HSet(ctx context.Context, key string, field string, val []byte) (int, error)
 	HVals(ctx context.Context, key string) ([][]byte, error)
 
