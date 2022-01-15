@@ -31,6 +31,32 @@ func (c *Cache) rwmutexcache(key string) (*sync.RWMutex, akv.Cache) {
 	return c.rwmutexs[i], c.caches[i]
 }
 
+// Hashes group
+
+func (c *Cache) HDel(ctx context.Context, key string, fields []string) (int, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.Lock()
+	defer rwmutex.Unlock()
+
+	return cache.HDel(ctx, key, fields)
+}
+
+func (c *Cache) HGet(ctx context.Context, key string, field string) ([]byte, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+
+	return cache.HGet(ctx, key, field)
+}
+
+func (c *Cache) HSet(ctx context.Context, key string, field string, val []byte) (int, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.Lock()
+	defer rwmutex.Unlock()
+
+	return cache.HSet(ctx, key, field, val)
+}
+
 // Keys group
 
 func (c *Cache) Del(ctx context.Context, keys []string) int {
