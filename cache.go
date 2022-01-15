@@ -18,6 +18,11 @@ type Cache interface {
 	// Keys group
 	Del(ctx context.Context, keys []string) int
 
+	// Sets group
+	SAdd(ctx context.Context, key string, members []string) (int, error)
+	SCard(ctx context.Context, key string) (int, error)
+	SRem(ctx context.Context, key string, members []string) (int, error)
+
 	// Strings group
 	Get(ctx context.Context, key string) ([]byte, error)
 	Set(ctx context.Context, key string, val []byte)

@@ -83,6 +83,23 @@ func (c *Cache) HSet(ctx context.Context, key string, field string, val []byte) 
 
 // Keys group
 
+func (c *Cache) getSetValue(ctx context.Context, key string) (Set, error) {
+	value, ok := c.m[key]
+	if !ok {
+		return nil, nil
+	}
+	return value.set()
+}
+
+func (c *Cache) setDefaultSetValue(ctx context.Context, key string) (Set, error) {
+	value, ok := c.m[key]
+	if !ok {
+		value = newSetValue()
+		c.m[key] = value
+	}
+	return value.set()
+}
+
 func (c *Cache) Del(ctx context.Context, keys []string) int {
 	count := 0
 	for _, key := range keys {
@@ -93,6 +110,38 @@ func (c *Cache) Del(ctx context.Context, keys []string) int {
 		}
 	}
 	return count
+}
+
+// Sets group
+
+func (c *Cache) SAdd(ctx context.Context, key string, members []string) (int, error) {
+	s, err := c.setDefaultSetValue(ctx, key)
+	if err != nil {
+		return 0, err
+	}
+	return s.add(members), nil
+}
+
+func (c *Cache) SCard(ctx context.Context, key string) (int, error) {
+	s, err := c.getSetValue(ctx, key)
+	if err != nil {
+		return 0, err
+	}
+	if s == nil {
+		return 0, nil
+	}
+	return s.len(), nil
+}
+
+func (c *Cache) SRem(ctx context.Context, key string, members []string) (int, error) {
+	s, err := c.getSetValue(ctx, key)
+	if err != nil {
+		return 0, err
+	}
+	if s == nil {
+		return 0, nil
+	}
+	return s.remove(members), nil
 }
 
 // Strings group

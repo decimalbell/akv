@@ -77,6 +77,79 @@ func TestDel(t *testing.T) {
 	assert.Equal(t, 1, cache.Del(ctx, []string{key}))
 }
 
+// Sets group
+
+func TestSAdd(t *testing.T) {
+	cache := NewCache()
+	ctx := context.TODO()
+	key := "key"
+	members := []string{"member"}
+
+	{
+		n, err := cache.SCard(ctx, key)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, n)
+	}
+
+	{
+		n, err := cache.SAdd(ctx, key, members)
+		assert.Nil(t, err)
+		assert.Equal(t, len(members), n)
+
+		n, err = cache.SCard(ctx, key)
+		assert.Nil(t, err)
+		assert.Equal(t, len(members), n)
+	}
+}
+
+func TestSCard(t *testing.T) {
+	cache := NewCache()
+	ctx := context.TODO()
+	key := "key"
+	members := []string{"member"}
+
+	n, err := cache.SCard(ctx, key)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, n)
+
+	n, err = cache.SAdd(ctx, key, members)
+	assert.Nil(t, err)
+	assert.Equal(t, len(members), n)
+	n, err = cache.SCard(ctx, key)
+	assert.Nil(t, err)
+	assert.Equal(t, len(members), n)
+
+	n, err = cache.SRem(ctx, key, members)
+	assert.Nil(t, err)
+	assert.Equal(t, len(members), n)
+	n, err = cache.SCard(ctx, key)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, n)
+}
+
+func TestSRem(t *testing.T) {
+	cache := NewCache()
+	ctx := context.TODO()
+	key := "key"
+	members := []string{"member"}
+
+	{
+		n, err := cache.SRem(ctx, key, members)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, n)
+	}
+
+	{
+		n, err := cache.SAdd(ctx, key, members)
+		assert.Nil(t, err)
+		assert.Equal(t, len(members), n)
+
+		n, err = cache.SRem(ctx, key, members)
+		assert.Nil(t, err)
+		assert.Equal(t, len(members), n)
+	}
+}
+
 // Strings group
 
 func TestGet(t *testing.T) {

@@ -70,6 +70,32 @@ func (c *Cache) Del(ctx context.Context, keys []string) int {
 	return count
 }
 
+// Sets group
+
+func (c *Cache) SAdd(ctx context.Context, key string, members []string) (int, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.Lock()
+	defer rwmutex.Unlock()
+
+	return cache.SAdd(ctx, key, members)
+}
+
+func (c *Cache) SCard(ctx context.Context, key string) (int, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+
+	return cache.SCard(ctx, key)
+}
+
+func (c *Cache) SRem(ctx context.Context, key string, members []string) (int, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.Lock()
+	defer rwmutex.Unlock()
+
+	return cache.SRem(ctx, key, members)
+}
+
 // Strings group
 
 func (c *Cache) Get(ctx context.Context, key string) ([]byte, error) {

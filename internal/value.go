@@ -33,6 +33,13 @@ func newHashValue() *value {
 	}
 }
 
+func newSetValue() *value {
+	return &value{
+		typ: valueTypeSet,
+		val: newSet(),
+	}
+}
+
 func (v *value) bytes() ([]byte, error) {
 	if v.typ != valueTypeBytes {
 		return nil, akv.ErrWrongType
@@ -51,6 +58,18 @@ func (v *value) hash() (Map, error) {
 	}
 
 	val, ok := v.val.(Map)
+	if !ok {
+		return nil, akv.ErrWrongType
+	}
+	return val, nil
+}
+
+func (v *value) set() (Set, error) {
+	if v.typ != valueTypeSet {
+		return nil, akv.ErrWrongType
+	}
+
+	val, ok := v.val.(Set)
 	if !ok {
 		return nil, akv.ErrWrongType
 	}
