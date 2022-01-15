@@ -114,6 +114,17 @@ func (c *Cache) HSet(ctx context.Context, key string, field string, val []byte) 
 	return 1, nil
 }
 
+func (c *Cache) HStrLen(ctx context.Context, key string, field string) (int, error) {
+	h, err := c.getHashValue(ctx, key)
+	if err != nil {
+		return 0, err
+	}
+	if h == nil {
+		return 0, nil
+	}
+	return len(h[field]), nil
+}
+
 func (c *Cache) HVals(ctx context.Context, key string) ([][]byte, error) {
 	h, err := c.getHashValue(ctx, key)
 	if err != nil {

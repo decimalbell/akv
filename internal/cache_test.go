@@ -46,7 +46,7 @@ func TestHGet(t *testing.T) {
 		cache.HSet(ctx, key, field, value)
 		v, err := cache.HGet(ctx, key, field)
 		assert.Nil(t, err)
-		assert.Equal(t, v, value)
+		assert.Equal(t, value, v)
 	}
 }
 
@@ -107,7 +107,28 @@ func TestHSet(t *testing.T) {
 	cache.HSet(ctx, key, field, value)
 	v, err := cache.HGet(ctx, key, field)
 	assert.Nil(t, err)
-	assert.Equal(t, v, value)
+	assert.Equal(t, value, v)
+}
+
+func TestHStrLen(t *testing.T) {
+	cache := NewCache()
+	ctx := context.TODO()
+	key := "key"
+	field := "field"
+	value := []byte("value")
+
+	{
+		v, err := cache.HStrLen(ctx, key, field)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, v)
+	}
+
+	{
+		cache.HSet(ctx, key, field, value)
+		v, err := cache.HStrLen(ctx, key, field)
+		assert.Nil(t, err)
+		assert.Equal(t, len(value), v)
+	}
 }
 
 func TestHVals(t *testing.T) {

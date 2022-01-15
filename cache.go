@@ -18,6 +18,7 @@ type Cache interface {
 	HLen(ctx context.Context, key string) (int, error)
 	HSet(ctx context.Context, key string, field string, val []byte) (int, error)
 	HVals(ctx context.Context, key string) ([][]byte, error)
+	HStrLen(ctx context.Context, key string, field string) (int, error)
 
 	// Keys group
 	Del(ctx context.Context, keys []string) int
