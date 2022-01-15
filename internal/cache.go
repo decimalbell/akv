@@ -133,6 +133,42 @@ func (c *Cache) SCard(ctx context.Context, key string) (int, error) {
 	return s.len(), nil
 }
 
+func (c *Cache) SIsMember(ctx context.Context, key string, member string) (int, error) {
+	s, err := c.getSetValue(ctx, key)
+	if err != nil {
+		return 0, err
+	}
+	if s == nil {
+		return 0, nil
+	}
+
+	if s.contains(member) {
+		return 1, nil
+	}
+	return 0, nil
+}
+
+func (c *Cache) SMIsMember(ctx context.Context, key string, members []string) ([]int, error) {
+	s, err := c.getSetValue(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	results := make([]int, len(members))
+	if s == nil {
+		return results, nil
+	}
+
+	for i, member := range members {
+		result := 0
+		if s.contains(member) {
+			result = 1
+		}
+		results[i] = result
+
+	}
+	return results, nil
+}
+
 func (c *Cache) SRem(ctx context.Context, key string, members []string) (int, error) {
 	s, err := c.getSetValue(ctx, key)
 	if err != nil {

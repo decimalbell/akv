@@ -88,6 +88,22 @@ func (c *Cache) SCard(ctx context.Context, key string) (int, error) {
 	return cache.SCard(ctx, key)
 }
 
+func (c *Cache) SIsMember(ctx context.Context, key string, member string) (int, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+
+	return cache.SIsMember(ctx, key, member)
+}
+
+func (c *Cache) SMIsMember(ctx context.Context, key string, members []string) ([]int, error) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+
+	return cache.SMIsMember(ctx, key, members)
+}
+
 func (c *Cache) SRem(ctx context.Context, key string, members []string) (int, error) {
 	rwmutex, cache := c.rwmutexcache(key)
 	rwmutex.Lock()

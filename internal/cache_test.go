@@ -127,6 +127,42 @@ func TestSCard(t *testing.T) {
 	assert.Equal(t, 0, n)
 }
 
+func TestSIsMember(t *testing.T) {
+	cache := NewCache()
+	ctx := context.TODO()
+	key := "key"
+	member := "member"
+
+	n, err := cache.SIsMember(ctx, key, member)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, n)
+
+	n, err = cache.SAdd(ctx, key, []string{member})
+	assert.Nil(t, err)
+	assert.Equal(t, 1, n)
+	n, err = cache.SIsMember(ctx, key, member)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, n)
+}
+
+func TestSMIsMember(t *testing.T) {
+	cache := NewCache()
+	ctx := context.TODO()
+	key := "key"
+	members := []string{"member"}
+
+	results, err := cache.SMIsMember(ctx, key, members)
+	assert.Nil(t, err)
+	assert.Equal(t, []int{0}, results)
+
+	n, err := cache.SAdd(ctx, key, members)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, n)
+	results, err = cache.SMIsMember(ctx, key, members)
+	assert.Nil(t, err)
+	assert.Equal(t, []int{1}, results)
+}
+
 func TestSRem(t *testing.T) {
 	cache := NewCache()
 	ctx := context.TODO()

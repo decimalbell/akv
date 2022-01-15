@@ -21,6 +21,8 @@ type Cache interface {
 	// Sets group
 	SAdd(ctx context.Context, key string, members []string) (int, error)
 	SCard(ctx context.Context, key string) (int, error)
+	SIsMember(ctx context.Context, key string, member string) (int, error)
+	SMIsMember(ctx context.Context, key string, members []string) ([]int, error)
 	SRem(ctx context.Context, key string, members []string) (int, error)
 
 	// Strings group
