@@ -7,12 +7,12 @@ import (
 )
 
 type Cache struct {
-	m map[string]*value
+	m map[string]*Value
 }
 
 func NewCache() akv.Cache {
 	return &Cache{
-		m: make(map[string]*value),
+		m: make(map[string]*Value),
 	}
 }
 

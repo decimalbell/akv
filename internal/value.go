@@ -14,33 +14,33 @@ const (
 	valueTypeHash  valueType = 4
 )
 
-type value struct {
+type Value struct {
 	typ valueType
 	val interface{}
 }
 
-func newBytesValue(val []byte) *value {
-	return &value{
+func newBytesValue(val []byte) *Value {
+	return &Value{
 		typ: valueTypeBytes,
 		val: val,
 	}
 }
 
-func newHashValue() *value {
-	return &value{
+func newHashValue() *Value {
+	return &Value{
 		typ: valueTypeHash,
 		val: make(Map),
 	}
 }
 
-func newSetValue() *value {
-	return &value{
+func newSetValue() *Value {
+	return &Value{
 		typ: valueTypeSet,
 		val: newSet(),
 	}
 }
 
-func (v *value) bytes() ([]byte, error) {
+func (v *Value) bytes() ([]byte, error) {
 	if v.typ != valueTypeBytes {
 		return nil, akv.ErrWrongType
 	}
@@ -52,7 +52,7 @@ func (v *value) bytes() ([]byte, error) {
 	return val, nil
 }
 
-func (v *value) hash() (Map, error) {
+func (v *Value) hash() (Map, error) {
 	if v.typ != valueTypeHash {
 		return nil, akv.ErrWrongType
 	}
@@ -64,7 +64,7 @@ func (v *value) hash() (Map, error) {
 	return val, nil
 }
 
-func (v *value) set() (Set, error) {
+func (v *Value) set() (Set, error) {
 	if v.typ != valueTypeSet {
 		return nil, akv.ErrWrongType
 	}
