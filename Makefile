@@ -11,10 +11,10 @@ cmd:
 	go build -o ${BIN_AKV} github.com/decimalbell/akv/cmd/akv
 
 test:
-	go test -race github.com/decimalbell/akv/cache
+	go test -race ./...
 
 cover:
-	go test -race -covermode=atomic -coverprofile=cover.out github.com/decimalbell/akv/cache
+	go test -race -covermode=atomic -coverprofile=cover.out ./...
 	go tool cover -html=cover.out
 
 bench:

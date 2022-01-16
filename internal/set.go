@@ -34,6 +34,23 @@ func (s Set) contains(member string) bool {
 	return ok
 }
 
+func (s Set) diff(ss []Set) []string {
+	members := make([]string, 0, len(s))
+	for member := range s {
+		ok := false
+		for _, set := range ss {
+			if set.contains(member) {
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			members = append(members, member)
+		}
+	}
+	return members
+}
+
 func (s Set) len() int {
 	return len(s)
 }
