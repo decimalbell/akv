@@ -1,22 +1,24 @@
-.PHONY: pkg cmd test clean
+.PHONY: pkg cmd test cover bench clean
 
 BIN_AKV=bin/akv
 
 all: pkg cmd test
 
 pkg:
-	go build github.com/decimalbell/akv
 	go build github.com/decimalbell/akv/cache
-	go build github.com/decimalbell/akv/internal
 
 cmd:
 	go build -o ${BIN_AKV} github.com/decimalbell/akv/cmd/akv
 
 test:
-	go test -race -v ./...
+	go test -race github.com/decimalbell/akv/cache
+
+cover:
+	go test -race -covermode=atomic -coverprofile=cover.out github.com/decimalbell/akv/cache
+	go tool cover -html=cover.out
 
 bench:
-	go test -race -v -bench=. ./...
+	go test -race -benchmem -bench=. github.com/decimalbell/akv/cache
 
 clean:
 	rm ${BIN_AKV}
