@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"hash/maphash"
+	"hash/fnv"
 	"sync"
 
 	"github.com/decimalbell/akv"
@@ -26,8 +26,8 @@ func New() akv.Cache {
 }
 
 func (c *Cache) rwmutexcache(key string) (*sync.RWMutex, akv.Cache) {
-	var h maphash.Hash
-	i := h.Sum64() % n
+	h := fnv.New32a()
+	i := h.Sum32() % n
 	return c.rwmutexs[i], c.caches[i]
 }
 
