@@ -46,3 +46,16 @@ func TestUnion(t *testing.T) {
 
 	assert.ElementsMatch(t, []string{"a", "b", "c", "d", "e"}, s1.union([]Set{s2, s3}))
 }
+
+func TestInter(t *testing.T) {
+	s1 := newSet()
+	s1.add([]string{"a", "b", "c", "d"})
+
+	s2 := newSet()
+	s2.add([]string{"c"})
+
+	s3 := newSet()
+	s3.add([]string{"a", "c", "e"})
+
+	assert.ElementsMatch(t, []string{"c"}, s1.inter([]Set{s2, s3}))
+}

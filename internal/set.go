@@ -47,6 +47,15 @@ func any(ss []Set, fn func(s Set) bool) bool {
 	return false
 }
 
+func all(ss []Set, fn func(s Set) bool) bool {
+	for _, set := range ss {
+		if !fn(set) {
+			return false
+		}
+	}
+	return true
+}
+
 func (s Set) diff(ss []Set) []string {
 	members := make([]string, 0, len(s))
 	for member := range s {
@@ -77,6 +86,19 @@ func (s Set) union(ss []Set) []string {
 	}
 
 	return result.members()
+}
+
+func (s Set) inter(ss []Set) []string {
+	members := make([]string, 0, len(s))
+	for member := range s {
+		ok := all(ss, func(s Set) bool {
+			return s.contains(member)
+		})
+		if ok {
+			members = append(members, member)
+		}
+	}
+	return members
 }
 
 func (s Set) members() []string {
