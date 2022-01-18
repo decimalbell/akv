@@ -27,6 +27,7 @@ type Cache interface {
 	SAdd(ctx context.Context, key string, members []string) (int, error)
 	SCard(ctx context.Context, key string) (int, error)
 	SIsMember(ctx context.Context, key string, member string) (int, error)
+	SMembers(ctx context.Context, key string) ([]string, error)
 	SMIsMember(ctx context.Context, key string, members []string) ([]int, error)
 	SRem(ctx context.Context, key string, members []string) (int, error)
 

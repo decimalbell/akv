@@ -227,6 +227,18 @@ func TestSIsMember(t *testing.T) {
 	assert.Equal(t, 1, n)
 }
 
+func TestSMembers(t *testing.T) {
+	cache := New()
+	ctx := context.TODO()
+	key := "key"
+	members := []string{"a", "b", "c"}
+
+	cache.SAdd(ctx, key, members)
+	result, err := cache.SMembers(ctx, key)
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, result, members)
+}
+
 func TestSMIsMember(t *testing.T) {
 	cache := New()
 	ctx := context.TODO()

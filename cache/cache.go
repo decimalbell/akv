@@ -31,6 +31,22 @@ func (c *Cache) rwmutexcache(key string) (*sync.RWMutex, akv.Cache) {
 	return c.rwmutexs[i], c.caches[i]
 }
 
+func (c *Cache) withLock(key string, fn func(cache akv.Cache)) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.Lock()
+	defer rwmutex.Unlock()
+
+	fn(cache)
+}
+
+func (c *Cache) withRLock(key string, fn func(cache akv.Cache)) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+
+	fn(cache)
+}
+
 // Hashes group
 
 func (c *Cache) HDel(ctx context.Context, key string, fields []string) (int, error) {
@@ -134,6 +150,13 @@ func (c *Cache) SIsMember(ctx context.Context, key string, member string) (int, 
 	defer rwmutex.RUnlock()
 
 	return cache.SIsMember(ctx, key, member)
+}
+
+func (c *Cache) SMembers(ctx context.Context, key string) (result []string, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		result, err = cache.SMembers(ctx, key)
+	})
+	return result, err
 }
 
 func (c *Cache) SMIsMember(ctx context.Context, key string, members []string) ([]int, error) {
