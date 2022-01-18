@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"hash/maphash"
+	"hash/fnv"
 	"sync"
 
 	"github.com/decimalbell/akv"
@@ -26,75 +26,83 @@ func New() akv.Cache {
 }
 
 func (c *Cache) rwmutexcache(key string) (*sync.RWMutex, akv.Cache) {
-	var h maphash.Hash
-	i := h.Sum64() % n
+	h := fnv.New32a()
+	i := h.Sum32() % n
 	return c.rwmutexs[i], c.caches[i]
+}
+
+func (c *Cache) withLock(key string, fn func(cache akv.Cache)) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.Lock()
+	defer rwmutex.Unlock()
+
+	fn(cache)
+}
+
+func (c *Cache) withRLock(key string, fn func(cache akv.Cache)) {
+	rwmutex, cache := c.rwmutexcache(key)
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+
+	fn(cache)
 }
 
 // Hashes group
 
-func (c *Cache) HDel(ctx context.Context, key string, fields []string) (int, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.Lock()
-	defer rwmutex.Unlock()
-
-	return cache.HDel(ctx, key, fields)
+func (c *Cache) HDel(ctx context.Context, key string, fields []string) (n int, err error) {
+	c.withLock(key, func(cache akv.Cache) {
+		n, err = cache.HDel(ctx, key, fields)
+	})
+	return n, err
 }
 
-func (c *Cache) HGet(ctx context.Context, key string, field string) ([]byte, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.RLock()
-	defer rwmutex.RUnlock()
-
-	return cache.HGet(ctx, key, field)
+func (c *Cache) HGet(ctx context.Context, key string, field string) (value []byte, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		value, err = cache.HGet(ctx, key, field)
+	})
+	return value, err
 }
 
-func (c *Cache) HGetAll(ctx context.Context, key string) ([][]byte, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.RLock()
-	defer rwmutex.RUnlock()
-
-	return cache.HGetAll(ctx, key)
+func (c *Cache) HGetAll(ctx context.Context, key string) (kvs [][]byte, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		kvs, err = cache.HGetAll(ctx, key)
+	})
+	return kvs, err
 }
 
-func (c *Cache) HKeys(ctx context.Context, key string) ([]string, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.RLock()
-	defer rwmutex.RUnlock()
-
-	return cache.HKeys(ctx, key)
+func (c *Cache) HKeys(ctx context.Context, key string) (keys []string, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		keys, err = cache.HKeys(ctx, key)
+	})
+	return keys, err
 }
 
-func (c *Cache) HLen(ctx context.Context, key string) (int, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.RLock()
-	defer rwmutex.RUnlock()
-
-	return cache.HLen(ctx, key)
+func (c *Cache) HLen(ctx context.Context, key string) (n int, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		n, err = cache.HLen(ctx, key)
+	})
+	return n, err
 }
 
-func (c *Cache) HSet(ctx context.Context, key string, field string, val []byte) (int, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.Lock()
-	defer rwmutex.Unlock()
-
-	return cache.HSet(ctx, key, field, val)
+func (c *Cache) HSet(ctx context.Context, key string, field string, val []byte) (n int, err error) {
+	c.withLock(key, func(cache akv.Cache) {
+		n, err = cache.HSet(ctx, key, field, val)
+	})
+	return n, err
 }
 
-func (c *Cache) HStrLen(ctx context.Context, key string, field string) (int, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.Lock()
-	defer rwmutex.Unlock()
-
-	return cache.HStrLen(ctx, key, field)
+func (c *Cache) HStrLen(ctx context.Context, key string, field string) (n int, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		n, err = cache.HStrLen(ctx, key, field)
+	})
+	return n, err
 }
 
-func (c *Cache) HVals(ctx context.Context, key string) ([][]byte, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.RLock()
-	defer rwmutex.RUnlock()
-
-	return cache.HVals(ctx, key)
+func (c *Cache) HVals(ctx context.Context, key string) (values [][]byte, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		values, err = cache.HVals(ctx, key)
+	})
+	return values, err
 }
 
 // Keys group
@@ -102,70 +110,68 @@ func (c *Cache) HVals(ctx context.Context, key string) ([][]byte, error) {
 func (c *Cache) Del(ctx context.Context, keys []string) int {
 	count := 0
 	for _, key := range keys {
-		rwmutex, cache := c.rwmutexcache(key)
-		rwmutex.Lock()
-		count += cache.Del(ctx, []string{key})
-		rwmutex.Unlock()
+		c.withRLock(key, func(cache akv.Cache) {
+			count += cache.Del(ctx, []string{key})
+		})
 	}
 	return count
 }
 
 // Sets group
 
-func (c *Cache) SAdd(ctx context.Context, key string, members []string) (int, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.Lock()
-	defer rwmutex.Unlock()
-
-	return cache.SAdd(ctx, key, members)
+func (c *Cache) SAdd(ctx context.Context, key string, members []string) (n int, err error) {
+	c.withLock(key, func(cache akv.Cache) {
+		n, err = cache.SAdd(ctx, key, members)
+	})
+	return n, err
 }
 
-func (c *Cache) SCard(ctx context.Context, key string) (int, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.RLock()
-	defer rwmutex.RUnlock()
-
-	return cache.SCard(ctx, key)
+func (c *Cache) SCard(ctx context.Context, key string) (n int, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		n, err = cache.SCard(ctx, key)
+	})
+	return n, err
 }
 
-func (c *Cache) SIsMember(ctx context.Context, key string, member string) (int, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.RLock()
-	defer rwmutex.RUnlock()
-
-	return cache.SIsMember(ctx, key, member)
+func (c *Cache) SIsMember(ctx context.Context, key string, member string) (n int, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		n, err = cache.SIsMember(ctx, key, member)
+	})
+	return n, err
 }
 
-func (c *Cache) SMIsMember(ctx context.Context, key string, members []string) ([]int, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.RLock()
-	defer rwmutex.RUnlock()
-
-	return cache.SMIsMember(ctx, key, members)
+func (c *Cache) SMembers(ctx context.Context, key string) (members []string, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		members, err = cache.SMembers(ctx, key)
+	})
+	return members, err
 }
 
-func (c *Cache) SRem(ctx context.Context, key string, members []string) (int, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.Lock()
-	defer rwmutex.Unlock()
+func (c *Cache) SMIsMember(ctx context.Context, key string, members []string) (nums []int, err error) {
+	c.withRLock(key, func(cache akv.Cache) {
+		nums, err = cache.SMIsMember(ctx, key, members)
+	})
+	return nums, err
+}
 
-	return cache.SRem(ctx, key, members)
+func (c *Cache) SRem(ctx context.Context, key string, members []string) (n int, err error) {
+	c.withLock(key, func(cache akv.Cache) {
+		n, err = cache.SRem(ctx, key, members)
+	})
+	return n, err
 }
 
 // Strings group
 
-func (c *Cache) Get(ctx context.Context, key string) ([]byte, error) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.RLock()
-	defer rwmutex.RUnlock()
-
-	return cache.Get(ctx, key)
+func (c *Cache) Get(ctx context.Context, key string) (value []byte, err error) {
+	c.withLock(key, func(cache akv.Cache) {
+		value, err = cache.Get(ctx, key)
+	})
+	return value, err
 }
 
 func (c *Cache) Set(ctx context.Context, key string, val []byte) {
-	rwmutex, cache := c.rwmutexcache(key)
-	rwmutex.Lock()
-	defer rwmutex.Unlock()
-
-	cache.Set(ctx, key, val)
+	c.withLock(key, func(cache akv.Cache) {
+		cache.Set(ctx, key, val)
+	})
 }

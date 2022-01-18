@@ -203,6 +203,17 @@ func (c *Cache) SIsMember(ctx context.Context, key string, member string) (int, 
 	return 0, nil
 }
 
+func (c *Cache) SMembers(ctx context.Context, key string) (result []string, err error) {
+	s, err := c.getSetValue(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	if s == nil {
+		return nil, nil
+	}
+	return s.members(), nil
+}
+
 func (c *Cache) SMIsMember(ctx context.Context, key string, members []string) ([]int, error) {
 	s, err := c.getSetValue(ctx, key)
 	if err != nil {
